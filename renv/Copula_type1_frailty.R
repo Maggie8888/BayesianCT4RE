@@ -43,8 +43,8 @@ simu_data<-function(iseed,t,n,p1,p2,tau,J,gamma){
         #C<-round(as.numeric(rnorm(n,200,10)))
         #C<-rep(365,n)
         id<-seq(1,n,by=1)
-        
-        
+
+
         for (i in 1:n){
                 j<-1
                 r_new<-0
@@ -80,10 +80,10 @@ simu_data<-function(iseed,t,n,p1,p2,tau,J,gamma){
                         }
                         j=j+1
                 }
-                
-                
-                
-                
+
+
+
+
                 data_example[[i]]<-cbind(id=id[i],gap_time=gap_time/365,group=group[i],lambda0=lambda0,c=C[i]/365,
                                          gamma=gamma[i],event=s2,t=t,tau=tau,days=cumsum(gap_time)/365,x1=x1[i],y1=max(cumsum(gap_time))/365,
                                          ni=1:length(gap_time),maxni=length(gap_time),s1=c(rep(0,length(gap_time)-1),rbinom(1,1,p2)))
@@ -92,14 +92,14 @@ simu_data<-function(iseed,t,n,p1,p2,tau,J,gamma){
         data_example<-data_example[data_example$gap_time!=0,]
         data_example$days<-ifelse(data_example$days>data_example$c,
                                   data_example$c,data_example$days)
-        
+
         data_example$event<-ifelse(data_example$days<data_example$c|data_example$days<data_example$t,
                                    1,0)
         data_example$event<-ifelse(data_example$days>=data_example$c|data_example$days>=data_example$t,
                                    0,1)
         data_example$s2<-data_example$event
         data_example$y2<-data_example$gap_time
-        return(data_example)  
+        return(data_example)
 }
 
 
@@ -144,7 +144,7 @@ simulate.data<-function(idx,nsim,n.sim,kk){
         theta_predict=matrix()
         theta=vector()
         main=list()
-        
+
         gamma=matrix(NA,nrow=n_patient, ncol=J+1)
         for(n_i in 1:n_patient){
                 t2=0
@@ -153,9 +153,9 @@ simulate.data<-function(idx,nsim,n.sim,kk){
                 theta[kk]=mu[kk]*exp(gamma[n_i,1])
                 repeat{
                         if(j>=2) gamma[n_i,j]=rho*gamma[n_i,j-1]+rnorm(1,0,sqrt(sigma_epsilon))
-                        
+
                         theta[kk]=mu[kk]*exp(gamma[n_i,j])
-                        
+
                         if(y1[n_i]==t1[n_i])
                         {
                                 w=runif(1)
@@ -163,13 +163,13 @@ simulate.data<-function(idx,nsim,n.sim,kk){
                                 #v=-1/theta*log(1+w*(1-exp(-theta))/(w*(exp(-theta*u[n_i])-1)-exp(-theta*u[n_i])))
                                 r_new=-log(v)/(lam2[n_i])
                         }
-                        
+
                         else if(s1[n_i]==0){
                                 w=exp(-lam1[n_i]*y1[n_i])
                                 uv=rCopula(J,claytonCopula(theta[kk]))
                                 v_sample=which(uv[,1]<=w)
                                 if (length(v_sample)==0 )  uv=rCopula(J,claytonCopula(theta[kk]))
-                                
+
                                 v=sample(uv[uv[,1]<=w,2],1,replace=F)
                                 r_new=-log(v)/(lam2[n_i])
                                 # w=runif(1)
@@ -190,17 +190,17 @@ simulate.data<-function(idx,nsim,n.sim,kk){
                                 break
                         }
                         j=j+1
-                        
+
                 }
                 s3=1-s2
                 s3[length(s2)]=(s1[n_i])
                 main[[n_i]]=cbind(id=n_i,y2=t2,s1=s1[n_i],s2,s3,group=x1[n_i,kk],x2=x2[n_i,kk],y1=y1[n_i],
                                   ni=1:length(t2),maxni=length(t2),theta=theta[kk])
         }
-        
+
         main=data.frame(do.call("rbind",main))
-        
-        
+
+
         return(main)
 }
 
@@ -220,7 +220,7 @@ para_est_JHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.start,
         sigma_sample=rep(sigma.start,n_sample)
         theta_sample=rep(theta.start,n_sample)
         scale=c(0.1,0.1,0.1,0.1,0.1,0.1,0.01,0.1) ###step size of MCMC###
-        
+
         phiN_est_list=MH_joint_model(b1=as.double(b1_sample), b2=as.double(b2_sample),b3=as.double(b3_sample),b4=as.double(b4_sample),
                                      b01=as.double(b01_sample), b02=as.double(b02_sample),
                                      phi=as.double(phi),sigma=as.double(sigma_sample),
@@ -228,7 +228,7 @@ para_est_JHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.start,
                                      y1=as.double(data$y1),y2=as.double(data$y2), s1=as.integer(data$s1),
                                      s2=as.integer(data$s2), id=as.integer(data$id-1), no_pat_p=as.integer(length(unique(data$id))),
                                      n_sample=as.integer(n_sample), N_p=as.integer(length(data$y1)),scale=as.double(scale))
-        
+
         param.trace<-cbind(phiN_est_list$b01[slice],phiN_est_list$b1[slice],phiN_est_list$b2[slice],phiN_est_list$b02[slice],
                            phiN_est_list$b3[slice],phiN_est_list$b4[slice],phiN_est_list$sigma[slice],phiN_est_list$theta[slice])
         beta_est<-apply(param.trace,2,mean)
@@ -237,9 +237,9 @@ para_est_JHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.start,
         beta_lower<-beta_est-1.96*beta_se
         est<-as.data.frame(rbind(beta_est,beta_se, beta_upper,beta_lower))
         colnames(est)<-c("b01","b1","b2","b02","b3,","b4","sigma","theta")
-        
+
         return(list(param.trace=param.trace,estimation=est,MCMC=phiN_est_list))
-        
+
 }
 ################# estimation in TVJHCM #############
 
@@ -260,9 +260,9 @@ para_est_TVJHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.star
         theta_sample=rep(na.omit(c(t(gamma.start))),n_sample)
         sigma_epsilon_sample=rep(sigma_epsilon.start,n_sample)
         mu_sample=rep(theta.start,n_sample)
-        
+
         scale=c(0.1,0.1,0.1,0.1,0.1,0.1,0.01,0.1,0.01)
-        
+
         result=MH_dep(b1=as.double(b1_sample), b2=as.double(b2_sample),b3=as.double(b3_sample),b4=as.double(b4_sample),
                       b01=as.double(b01_sample), b02=as.double(b02_sample),
                       phi=as.double(phi),sigma=as.double(sigma_sample),mu=as.double(mu_sample),
@@ -271,7 +271,7 @@ para_est_TVJHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.star
                       y1=as.double(data$y1),y2=as.double(data$y2), s1=as.integer(data$s1),
                       s2=as.integer(data$s2), id=as.integer(data$id-1), no_pat_p=as.integer(length(unique(data$id))),
                       n_sample=as.integer(n_sample),  N_p=as.integer(length(data$y1)),scale=as.double(scale),ni=as.integer(data$ni),maxni=as.integer(data$maxni))
-        
+
         b1_est=mean(result$b1[slice])
         b2_est=mean(result$b2[slice])
         b3_est=mean(result$b3[slice])
@@ -282,7 +282,7 @@ para_est_TVJHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.star
         sigma_epsilon_est=mean(result$sigma_epsilon[slice])
         sigma_est=mean(result$sigma[slice])
         mu_est=mean(result$mu[slice])
-        
+
         param.trace<-cbind(result$b01[slice],result$b1[slice],result$b2[slice],result$b02[slice],
                            result$b3[slice],result$b4[slice],result$sigma[slice],result$sigma_epsilon[slice],result$mu[slice]
                            ,result$rho[slice])
@@ -292,9 +292,9 @@ para_est_TVJHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.star
         beta_lower<-beta_est-1.96*beta_se
         est<-as.data.frame(rbind(beta_est,beta_se, beta_upper,beta_lower))
         colnames(est)<-c("b01","b1","b2","b02","b3,","b4","sigma","sigma_epsilon","theta_mu","rho")
-        
+
         return(list(param.trace=param.trace,estimation=est,MCMC=result))
-        
+
 }
 
 
@@ -310,9 +310,9 @@ type1<-function(duration,sample_size,p1,p2,tau,J,gamma,sim_num,iseed2){
                 output[[iseed]]<-para_est_JHCM(1,1,0,0,0,0,0.1,1,5000,100,20,iseed,
  simu_data(iseed*iseed2,duration/duration,sample_size,p1,p2,tau,J,gamma))$param.trace[,5]
         }
-        
+
         return(output)
-        
+
 }
 
 
@@ -323,37 +323,37 @@ type1<-function(duration,sample_size,p1,p2,tau,J,gamma,sim_num,iseed2){
 #install.packages("/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/gsl_1.9-10.tar.gz", lib="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/",repos = NULL)
 #library(MASS,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
 #library(survC1,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(foreach,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(pcaPP,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(iterators,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(doMC,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(ipred,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(survival,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(prodlim,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(gsl,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(copula,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(foreach,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(doParallel,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(Rcpp,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(RcppArmadillo,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(frailtypack,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(MASS,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-library(survC1,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
-sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_joint_model.cpp")
-sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_dep.cpp")
+#library(foreach,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(pcaPP,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(iterators,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(doMC,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(ipred,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(survival,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(prodlim,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(gsl,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(copula,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(foreach,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(doParallel,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(Rcpp,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(RcppArmadillo,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(frailtypack,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(MASS,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#library(survC1,lib.loc="/storage/home/m/mjl6416/R/x86_64-redhat-linux-gnu-library/3.6/")
+#sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_joint_model.cpp")
+#sourceCpp("/storage/work/m/mjl6416/jointmodeling/01code/copula_dep.cpp")
 
-args=(commandArgs(TRUE))
-job = as.numeric(gsub("\\job=", "", args))
-numCores <- 100
-registerDoParallel(numCores)
-sim_num<-10000
-n.sim=job
-result<-list()
-tau=1
+#args=(commandArgs(TRUE))
+#job = as.numeric(gsub("\\job=", "", args))
+#numCores <- 100
+#registerDoParallel(numCores)
+#sim_num<-10000
+#n.sim=job
+#result<-list()
+#tau=1
 ### tau=1; gamma=0 ####
-result[[n.sim]]<-type1(365,40,0.5,0.4,1,30,0,sim_num,n.sim)
-setwd("/storage/work/m/mjl6416/BayesianCT/02results")
-saveRDS(result,paste0("copula_",tau,"_type1_frailty.rds"))
+#result[[n.sim]]<-type1(365,40,0.5,0.4,1,30,0,sim_num,n.sim)
+#setwd("/storage/work/m/mjl6416/BayesianCT/02results")
+#saveRDS(result,paste0("copula_",tau,"_type1_frailty.rds"))
 
 
 
