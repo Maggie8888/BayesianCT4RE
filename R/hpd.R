@@ -1,5 +1,5 @@
-# A good guide: http://www.bayesian-inference.com/credible
-# http://stats.stackexchange.com/questions/24681/what-is-the-decision-theoretic-justification-for-bayesian-credible-interval-proc
+#'# A good guide: http://www.bayesian-inference.com/credible
+#'# http://stats.stackexchange.com/questions/24681/what-is-the-decision-theoretic-justification-for-bayesian-credible-interval-proc
 
 library(modeest)
 library(coda)
@@ -22,10 +22,10 @@ plot_dens <- function(x, y, low=NULL, high=NULL, point=NULL, color, est_color, p
                         lines(c(low[i], high[i]), rep(-max(y) * 0.05 * i , 2), lwd=2, col = est_color[i])
                 }
         }
-        
+
         lines(x, y, type="l")
         lines(range(x), c(0,0), type="l", col="gray")
-        
+
         for(i in seq_along(point)) {
                 if(overdraw_interval) {
                         points(point[i], -max(y) * 0.05, pch=19, col = est_color[i], lwd=2 * max(1, length(low)))
@@ -44,14 +44,14 @@ plot_and_calc_dens <- function(dist, xlim, calc_point=NULL, calc_interval=NULL, 
         calc_interval <- c(calc_interval)
         n = 256
         x = seq(xlim[1], xlim[2], length.out = n)
-        
+
         y <- get(paste0("d", dist))(x, ...)
         s <-  get(paste0("r", dist))(99999, ...)
         low <- c()
         high <- c()
         point <- c()
         coverage <- rep(coverage, length(calc_interval))
-        
+
         for(i in seq_along(calc_interval)) {
                 interval <- calc_interval[[i]](s, coverage[i])
                 low[i] <- interval[1]
@@ -60,7 +60,7 @@ plot_and_calc_dens <- function(dist, xlim, calc_point=NULL, calc_interval=NULL, 
         for(i in seq_along(calc_point)) {
                 point[i] <- calc_point[[i]](s)
         }
-        
+
         plot_dens(x, y, low, high, point, color, est_color, point_est_line_color, overdraw_interval)
 }
 

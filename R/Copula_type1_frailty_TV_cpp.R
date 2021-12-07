@@ -15,37 +15,41 @@ require(doParallel)
 require(Rcpp)
 require(RcppArmadillo)
 require(frailtypack)
-sourceCpp("src/copula_joint_model.cpp")
-sourceCpp("src/copula_dep.cpp")
-sourceCpp("src/frailty_reg.cpp")
+#sourceCpp("src/copula_joint_model.cpp")
+#sourceCpp("src/copula_dep.cpp")
+#sourceCpp("src/frailty_reg.cpp")
 source("R/auc.curve.R")
 require(tdROC)
 require(modeest)
 source("R/hpd.R")
 
 
-####################################################################
-#####the function is for log likelihood function of the data########
-### function argurments: #######
-##b1: the parameter for x1 in the hazard funtion for the terminal event;
-##b2: the parameter for x2 in the hazard funtion for the terminal event;
-##b3: the parameter for x1 in the hazard funtion for the recurrent event;
-##b4: the parameter for x2 in the hazard funtion for the recurrent event;
-##b01, b02: baseline hazards for the terminal event and the recurrent events, respectively;
-##phi: random effect term denoted as w in paper; {W_i}
-##theta: correlation parameter for copula function; {gamma_ij}
-## Mu: theta_mu average level correlation
-##x1, x2: two covariates in the hazard function for the terminal event and the recurrent event;
-##y1, y2: observed time for the terminal event and the recurrent event;
-##s1, s2: failing indicator for the terminal event and the recurrent event;
-##id: subject id;
-##N: the sample size of subjects;
-####################################################################
-####################################################################
+#'####################################################################
+#'#####the function is for log likelihood function of the data########
+#'### function argurments: #######
+#'##b1: the parameter for x1 in the hazard funtion for the terminal event;
+#'##b2: the parameter for x2 in the hazard funtion for the terminal event;
+#'##b3: the parameter for x1 in the hazard funtion for the recurrent event;
+#'##b4: the parameter for x2 in the hazard funtion for the recurrent event;
+#'##b01, b02: baseline hazards for the terminal event and the recurrent events, respectively;
+#'##phi: random effect term denoted as w in paper; {W_i}
+#'##theta: correlation parameter for copula function; {gamma_ij}
+#'## Mu: theta_mu average level correlation
+#'##x1, x2: two covariates in the hazard function for the terminal event and the recurrent event;
+#'##y1, y2: observed time for the terminal event and the recurrent event;
+#'##s1, s2: failing indicator for the terminal event and the recurrent event;
+#'##id: subject id;
+#'##N: the sample size of subjects;
+#'####################################################################
+#'####################################################################
 
-######################################################
-######   generate data and fit the model   ##########
-######################################################
+#'######################################################
+#'######   generate data and fit the model   ##########
+#'######################################################
+#' @param iseed,t,n,p1,p2,tau,J,gamma,idx,nsim,n.sim,kk,b1,b2,b3,b4
+#' @return simulated dataset
+#' @export
+
 simu_data<-function(iseed,t,n,p1,p2,tau,J,gamma){
         set.seed(iseed)
         data_example<-list()
@@ -227,7 +231,12 @@ simulate.data<-function(idx,nsim,n.sim,kk,b1,b2,b3,b4){
 
         return(main)
 }
-################# estimation in JHCM #############
+#'################# estimation in JHCM #############
+#' @param b01.start,b02.start,b1.start,b2.start,b3.start,b4.start,sigma.start,theta.start,
+#' @param n_sample,n_burn,thin,n.sim,data
+#' @return parameter estimation from JHCM
+#' @export
+
 para_est_JHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.start,sigma.start,theta.start,
                         n_sample,n_burn,thin,n.sim,data){
         phi=rnorm(length(unique(data$id)),0,0.5)
@@ -326,6 +335,10 @@ para_est_TVJHCM<-function(b01.start,b02.start,b1.start,b2.start,b3.start,b4.star
 #################################################################################
 data1<-simulate.data(1,1,1,1,0,0,0,0)
 gamma.start=gamma=matrix(0.001,nrow=length(unique(data1$id)), ncol=1000)
+
+#' @param iseed,t,n,p1,p2,tau,J,gamma,idx,nsim,n.sim,kk,b1,b2,b3,b4
+#' @return simulated dataset
+#' @export
 type1<-function(duration,sample_size,p1,p2,tau,J,gamma,sim_num,iseed2){
         output<-list()
         for(iseed in 1:((sim_num)/100)){
